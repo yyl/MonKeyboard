@@ -54,7 +54,7 @@ public final class DictionaryService extends Service {
     /**
      * The package name, to use in the intent actions.
      */
-    private static final String PACKAGE_NAME = "com.android.android.inputmethod.latin";
+    private static final String PACKAGE_NAME = "com.yyl.inputmethod.latin";
 
     /**
      * The action of the intent to tell the dictionary provider to update now.
