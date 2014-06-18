@@ -1386,6 +1386,17 @@ public class LatinIME extends InputMethodService implements KeyboardActionListen
     // Implementation of {@link KeyboardActionListener}.
     @Override
     public void onCodeInput(final int primaryCode, final int x, final int y) {
+    	// yulong
+    	final MainKeyboardView mainKeyboardView = mKeyboardSwitcher.getMainKeyboardView();
+    	int variation = getCurrentInputEditorInfo().inputType & InputType.TYPE_MASK_VARIATION;
+    	if (variation == InputType.TYPE_TEXT_VARIATION_PASSWORD
+    	     || variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+    	     || variation == InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD) {
+    	          Log.i("onCodeInput", primaryCode + " " + " password " + mainKeyboardView.isShowingMoreKeysPanel());
+    	} else {
+    	          Log.i("onCodeInput", primaryCode + " " + " application " + mainKeyboardView.isShowingMoreKeysPanel());
+    	}
+    	
         if (ProductionFlag.USES_DEVELOPMENT_ONLY_DIAGNOSTICS) {
             ResearchLogger.latinIME_onCodeInput(primaryCode, x, y);
         }
@@ -2633,7 +2644,7 @@ public class LatinIME extends InputMethodService implements KeyboardActionListen
     // Callback called by PointerTracker through the KeyboardActionListener. This is called when a
     // key is depressed; release matching call is onReleaseKey below.
     @Override
-    public void onPressKey(final int primaryCode, final boolean isSinglePointer) {
+    public void onPressKey(final int primaryCode, final boolean isSinglePointer) { 	
         mKeyboardSwitcher.onPressKey(primaryCode, isSinglePointer);
     }
 
