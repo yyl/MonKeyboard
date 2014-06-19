@@ -14,7 +14,7 @@ import android.content.Context;
 import android.os.Environment;
 
 public class Logger {
-	private static final String LOG_PATH = "/keyboard_monitoring";
+	private static final String LOG_PATH = "/monkeyboard";
 	private File logFile;
 	private static File directory = new File(
 			Environment.getExternalStorageDirectory(), LOG_PATH);
@@ -39,7 +39,7 @@ public class Logger {
 		hm = new HashMap<Integer, String>();
 		hm.put(-1, "shift");
 		hm.put(-2, "switch");
-		hm.put(-4, "delete￼");
+		hm.put(-4, "delete");
 		hm.put(-7, "next");
 		hm.put(-8, "prev");
 		hm.put(-5, "config");
@@ -68,7 +68,7 @@ public class Logger {
 			// BufferedWriter for performance, true to set append to file flag
 			BufferedWriter buf = new BufferedWriter(new FileWriter(logFile,
 					true));
-			buf.append(time + "," + code + "," + mappingKey(code) + "," + text);
+			buf.append(time + "," + mappingKey(code) + "," + text);
 			buf.newLine();
 			buf.close();
 		} catch (IOException e) {
