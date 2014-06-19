@@ -1,19 +1,15 @@
 package com.yyl.inputmethod.latin;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import android.R;
 import android.content.Context;
 import android.os.Environment;
 
@@ -23,19 +19,12 @@ public class Logger {
 	private static File directory = new File(
 			Environment.getExternalStorageDirectory(), LOG_PATH);
 	private Calendar calendar;
-	private HashMap<String, String> hm;
+	private HashMap<Integer, String> hm;
 	private Context context;
 	private String fname;
 
 	public Logger(String filename) {
 		this.fname = filename;
-		hm = new HashMap<String, String>();
-		try {
-			mappingKey();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 		if (!directory.exists()) {
 			directory.mkdirs();
 		}
@@ -47,9 +36,31 @@ public class Logger {
 				e.printStackTrace();
 			}
 		}
+		hm = new HashMap<Integer, String>();
+		hm.put(-1, "shift");
+		hm.put(-2, "switch");
+		hm.put(-4, "delete￼");
+		hm.put(-7, "next");
+		hm.put(-8, "prev");
+		hm.put(-5, "config");
+		hm.put(10, "enter");
+		hm.put(32, "space");
 	}
 
-	public void appendWithTime(String text) {
+	public void append(String text) {
+		try {
+			// BufferedWriter for performance, true to set append to file flag
+			BufferedWriter buf = new BufferedWriter(new FileWriter(logFile,
+					true));
+			buf.append(text);
+			buf.newLine();
+			buf.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+		
+	public void appendWithTime(int code, String text) {
 		calendar = Calendar.getInstance();
 		long millis = calendar.getTimeInMillis();
 		String time = parseTime(millis);
@@ -57,7 +68,7 @@ public class Logger {
 			// BufferedWriter for performance, true to set append to file flag
 			BufferedWriter buf = new BufferedWriter(new FileWriter(logFile,
 					true));
-			buf.append(time + "," + text);
+			buf.append(time + "," + code + "," + mappingKey(code) + "," + text);
 			buf.newLine();
 			buf.close();
 		} catch (IOException e) {
@@ -65,38 +76,19 @@ public class Logger {
 		}
 	}
 
-	public void appendWithTimeAndKey(String text) {
-		calendar = Calendar.getInstance();
-		String time = parseTime(calendar.getTimeInMillis());
-		try {
-			// BufferedWriter for performance, true to set append to file flag
-			BufferedWriter buf = new BufferedWriter(new FileWriter(logFile,
-					true));
-			buf.append(time + "@ " + calendar.getTimeInMillis() + " " + text
-					+ " " + hm.get(text));
-			buf.newLine();
-			buf.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void mappingKey() throws IOException {
-		InputStream raw = context.getAssets().open("keymap.txt");
-		InputStreamReader inputreader = new InputStreamReader(raw);
-		BufferedReader buffreader = new BufferedReader(inputreader);
-		String line;
-
-		try {
-			while ((line = buffreader.readLine()) != null) {
-				String item[] = line.split(" ");
-				System.out.println("code: " + item[0] + " label: " + item[1]);
-				hm.put(item[0], item[1]);
-			}
-			inputreader.close();
-			buffreader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+	public String mappingKey(int code){
+		if (hm.get(code) != null) {
+			return hm.get(code);
+		} else if (97 <= code && code <= 122) {
+			return "lowercase";
+		} else if (65 <= code && code <= 90) {
+			return "uppercase";
+		} else if (48 <= code && code <= 57) { 
+			return "digit";
+		} else if (code <= 126) {
+			return "symbol";
+		} else {
+			return "special";
 		}
 	}
 
@@ -114,9 +106,9 @@ public class Logger {
 	}
 
 	public String parseTime(long t) {
-		String format = "HH::mm::ss";
+		String format = "yyyy-MM-dd-HH:mm:ss";
 		SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.US);
-		sdf.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		sdf.setTimeZone(TimeZone.getDefault());
 		String gmtTime = sdf.format(t);
 		return gmtTime;
 	}
